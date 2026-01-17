@@ -1,0 +1,602 @@
+---
+title: "Visualizing Robustness in Biomedical Data Analysis"
+author: "<br><br><span style='font-size:25px;'><strong>Lesley Chapman Hannah, Ph.D., M.S.</strong></span><br>College of Graduate Studies<br>Northeast Ohio Medical University"
+
+format: 
+  revealjs:
+    #theme: solarized
+    css: style.css
+    slide-number: true
+    chalkboard: 
+      buttons: false
+    preview-links: auto
+    logo: images/Flame.jpg
+    #css: styles.css
+    
+---
+
+
+## <span style="font-size:80%">Robustness in Data Analysis</span> {.smaller}
+
+- Robustness: capacity of a model, analytic pipeline, or scientific conclusion to consistent behavior when exposed to variations and/or perturbations
+- Variations can arise across the data science lifecycle, including: data acquisition, preprocessing, model development, validation, and real-world deployment
+- Examples of types of variation:
+  - missing or imbalanced data
+  - uncertainty in labels
+  - alternative feature extraction or selection strategies
+  - shifts in patient populations
+  
+  
+<span style="font-size:50%">Balendran, A., et. al. npj Digit. Med. 8, 38 (2025).</span>
+
+::: footer
+
+:::
+
+
+## <span style="font-size:80%">Robustness in the Data Science Lifecycle</span> {.smaller}
+
+- robustness: process by which analytic results and interpretations remain consistent as data are imported, structured, transformed, modeled, and communicated
+- **import and tidy stages**: ability to maintain analytic results when variation in data acquisition, encoding, missingness might occur
+- **transformation**: stability of preprocessing choices such as normalization, filtering, and thresholding that encode biological and clinical assumptions
+- **model stage**: consistency of estimates and predictions across reasonable model specifications, training strategies, and validation contexts
+- **communication**: robustness is conveyed as visual evidence supporting the scientific claim, with figures that make stability and sensitivity transparent
+  
+::: footer
+
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+## <span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span> {.smaller}
+
+
+::: columns
+::: {.column .small}
+
+Research Question:
+
+Are inflammatory biomarkers higher in sepsis cases than in controls, and is that conclusion robust to site-to-site differences in missingness?
+
+Background:
+
+- different hospitals/sites often have different lab workflows 
+- one site has more missing lactate values (missingness that is operational, not biological)
+- the same clinical label can arrive encoded as "Sepsis", "sepsis", "Yes", "1", etc $\rightarrow$ use tidy strategies to make encodings uniform
+
+Conclusions
+- Hospital B has more missing values than Hospital A
+
+
+:::
+::: column
+
+```{r}
+#| fig-width: 8
+#| fig-height: 9
+
+library(tidyverse)
+library(broom)
+
+set.seed(42)
+n <- 300
+
+# -----------------------------
+# Simulate imported EHR-style data
+# -----------------------------
+raw <- tibble(
+  site = sample(c("Hospital_A","Hospital_B"), n, replace = TRUE),
+  sepsis_raw = sample(c("Sepsis","sepsis","YES","1","Control"), n, replace = TRUE),
+  lactate = rlnorm(
+    n,
+    meanlog = if_else(sepsis_raw %in% c("Sepsis","sepsis","YES","1"),
+                      log(2.2), log(1.4)),
+    sdlog = 0.35
+  )
+) |>
+  # import-stage operational missingness
+  mutate(lactate = if_else(site=="Hospital_B" & runif(n) < 0.35,
+                           NA_real_, lactate))
+
+# -----------------------------
+# Naive model (messy encoding)
+# -----------------------------
+fit_before <- lm(log(lactate) ~ sepsis_raw, data = raw)
+
+before_est <- tidy(fit_before, conf.int = TRUE) |>
+  filter(str_detect(term, "^sepsis_raw")) |>
+  summarise(
+    estimate = mean(estimate, na.rm = TRUE),
+    conf.low = mean(conf.low, na.rm = TRUE),
+    conf.high = mean(conf.high, na.rm = TRUE),
+    version = "Before tidy encoding"
+  )
+
+# -----------------------------
+# Tidy repair: consistent binary
+# -----------------------------
+tidy_data <- raw |>
+  mutate(sepsis = if_else(
+    str_to_lower(sepsis_raw) %in% c("sepsis","yes","1"), 1, 0
+  ))
+
+fit_after <- lm(log(lactate) ~ sepsis, data = tidy_data)
+
+after_est <- tidy(fit_after, conf.int = TRUE) |>
+  filter(term == "sepsis") |>
+  transmute(
+    estimate, conf.low, conf.high,
+    version = "After tidy encoding"
+  )
+
+# Missingness Plots
+raw |>
+  mutate(missing = is.na(lactate)) |>
+  count(site, missing) |>
+  group_by(site) |>
+  mutate(prop = n / sum(n)) |>
+  ggplot(aes(x = site, y = prop, fill = missing)) +
+  geom_col() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(
+    title = "Lactate Missingness by Hospital",
+    x = "Hospital site",
+    y = "Proportion of records",
+    fill = "Data missing?"
+  ) +
+  theme_bw()
+
+
+
+```
+:::
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+## <span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span> {.smaller}
+
+
+::: columns
+::: {.column .small}
+
+Initial robustness claim:
+
+- estimated sepsis–lactate association as determined by a linear model, should not depend on encoding differences [missingness]
+
+Data Considerations:
+
+- one hospital has systematically more missing lactate labs
+- sepsis status encoded inconsistently
+- data appears missing because of differences in encodings
+
+
+:::
+::: column
+
+```{r}
+#| fig-width: 8
+#| fig-height: 9
+
+library(tidyverse)
+library(broom)
+
+set.seed(42)
+n <- 300
+
+# -----------------------------
+# Simulate imported EHR-style data
+# -----------------------------
+raw <- tibble(
+  site = sample(c("Hospital_A","Hospital_B"), n, replace = TRUE),
+  sepsis_raw = sample(c("Sepsis","sepsis","YES","1","Control"), n, replace = TRUE),
+  lactate = rlnorm(
+    n,
+    meanlog = if_else(sepsis_raw %in% c("Sepsis","sepsis","YES","1"),
+                      log(2.2), log(1.4)),
+    sdlog = 0.35
+  )
+) |>
+  # import-stage operational missingness
+  mutate(lactate = if_else(site=="Hospital_B" & runif(n) < 0.35,
+                           NA_real_, lactate))
+
+# -----------------------------
+# Naive model (messy encoding)
+# -----------------------------
+fit_before <- lm(log(lactate) ~ sepsis_raw, data = raw)
+
+before_est <- tidy(fit_before, conf.int = TRUE) |>
+  filter(str_detect(term, "^sepsis_raw")) |>
+  summarise(
+    estimate = mean(estimate, na.rm = TRUE),
+    conf.low = mean(conf.low, na.rm = TRUE),
+    conf.high = mean(conf.high, na.rm = TRUE),
+    version = "Before tidy encoding"
+  )
+
+# -----------------------------
+# Tidy repair: consistent binary
+# -----------------------------
+tidy_data <- raw |>
+  mutate(sepsis = if_else(
+    str_to_lower(sepsis_raw) %in% c("sepsis","yes","1"), 1, 0
+  ))
+
+fit_after <- lm(log(lactate) ~ sepsis, data = tidy_data)
+
+after_est <- tidy(fit_after, conf.int = TRUE) |>
+  filter(term == "sepsis") |>
+  transmute(
+    estimate, conf.low, conf.high,
+    version = "After tidy encoding"
+  )
+
+# -----------------------------
+# Plot: robustness of estimate + uncertainty
+# -----------------------------
+bind_rows(before_est, after_est) |>
+  mutate(version = factor(version,
+                          levels = c("Before tidy encoding",
+                                     "After tidy encoding"))) |>
+  ggplot(aes(x = estimate, y = version)) +
+  geom_point(size = 3) +
+  geom_errorbarh(
+    aes(xmin = conf.low, xmax = conf.high),
+    height = 0.2
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Sepsis Effect on log(Lactate)",
+    x = "Estimated effect (with 95% CI)",
+    y = NULL
+  ) +
+  theme_bw()
+
+
+```
+:::
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+## <span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span> {.smaller}
+
+
+::: columns
+::: {.column .small}
+
+
+Standardize variable:
+
+- in the `sepsis_raw` data column the following is noted:
+- Sepsis-positive: "Sepsis", "sepsis", "YES", "1"
+- Sepsis-negative: "Control"
+- standardize values : sepsis is encoded as 1 or 0: 1- sepsis present; 0 - control
+
+```r
+tidy_data <- raw |>
+  mutate(sepsis = if_else(
+    str_to_lower(sepsis_raw) %in% c("sepsis","yes","1"), 1, 0
+  ))
+```
+
+- post encoding repair : estimated sepsis effect (with uncertainty) reflects true assoication of sepsis with outcome
+
+:::
+::: column
+
+```{r}
+#| fig-width: 8
+#| fig-height: 9
+
+library(tidyverse)
+library(broom)
+
+set.seed(42)
+n <- 300
+
+# -----------------------------
+# Simulate imported EHR-style data
+# -----------------------------
+raw <- tibble(
+  site = sample(c("Hospital_A","Hospital_B"), n, replace = TRUE),
+  sepsis_raw = sample(c("Sepsis","sepsis","YES","1","Control"), n, replace = TRUE),
+  lactate = rlnorm(
+    n,
+    meanlog = if_else(sepsis_raw %in% c("Sepsis","sepsis","YES","1"),
+                      log(2.2), log(1.4)),
+    sdlog = 0.35
+  )
+) |>
+  # import-stage operational missingness
+  mutate(lactate = if_else(site=="Hospital_B" & runif(n) < 0.35,
+                           NA_real_, lactate))
+
+# -----------------------------
+# Naive model (messy encoding)
+# -----------------------------
+fit_before <- lm(log(lactate) ~ sepsis_raw, data = raw)
+
+before_est <- tidy(fit_before, conf.int = TRUE) |>
+  filter(str_detect(term, "^sepsis_raw")) |>
+  summarise(
+    estimate = mean(estimate, na.rm = TRUE),
+    conf.low = mean(conf.low, na.rm = TRUE),
+    conf.high = mean(conf.high, na.rm = TRUE),
+    version = "Before tidy encoding"
+  )
+
+# -----------------------------
+# Tidy repair: consistent binary
+# -----------------------------
+tidy_data <- raw |>
+  mutate(sepsis = if_else(
+    str_to_lower(sepsis_raw) %in% c("sepsis","yes","1"), 1, 0
+  ))
+
+fit_after <- lm(log(lactate) ~ sepsis, data = tidy_data)
+
+after_est <- tidy(fit_after, conf.int = TRUE) |>
+  filter(term == "sepsis") |>
+  transmute(
+    estimate, conf.low, conf.high,
+    version = "After tidy encoding"
+  )
+
+# -----------------------------
+# Plot: robustness of estimate + uncertainty
+# -----------------------------
+bind_rows(before_est, after_est) |>
+  mutate(version = factor(version,
+                          levels = c("Before tidy encoding",
+                                     "After tidy encoding"))) |>
+  ggplot(aes(x = estimate, y = version)) +
+  geom_point(size = 3) +
+  geom_errorbarh(
+    aes(xmin = conf.low, xmax = conf.high),
+    height = 0.2
+  ) +
+  geom_vline(xintercept = 0, linetype = "dashed") +
+  labs(
+    title = "Sepsis Effect on log(Lactate)",
+    x = "Estimated effect (with 95% CI)",
+    y = NULL
+  ) +
+  theme_bw()
+
+
+```
+:::
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+## <span style="font-size:60%">Data Lifecycle and Robustness - Transformation </span> {.smaller}
+
+
+::: columns
+::: {.column .small}
+
+
+- Data transformation stage: convert raw measurements into analytically usable quantities
+- Steps involve:
+  - normalization (log transforms, scaling)
+  - filtering (excluding low-quality or undetectable values)
+  - thresholding (limits of detection, clinical cutoffs)
+  
+Research Question:
+
+Does disease status affect biomarker levels, and is that conclusion stable when we change what we consider “detectable” biomarker values?
+
+Simulated dataset:
+
+- dataset represents a multi-site clinical study [n=400] measuring a continuous circulating biomarker—such as a plasma protein or metabolite—hypothesized to be modestly elevated in individuals with disease
+
+
+
+
+:::
+::: column
+
+```{r}
+#| fig-width: 8
+#| fig-height: 9
+
+library(tidyverse)
+library(broom)
+library(purrr)
+
+set.seed(2)
+n <- 400
+
+dat <- tibble(
+  disease = rbinom(n, 1, 0.5),
+  site = sample(c("Site_A","Site_B"), n, replace = TRUE),
+  biomarker = rnorm(n, mean = 0.9*disease, sd = 1.1)
+) |>
+  # imagine assay has a detection limit; values below are effectively "undetected"
+  mutate(lod = -0.2)
+
+threshold_grid <- tibble(thresh = seq(-1, 1, by = 0.1))
+
+sens <- threshold_grid |>
+  mutate(
+    # analyst choice: filter to "detectable" biomarker values
+    est = map(thresh, \(t) {
+      d <- dat |>
+        mutate(detect = biomarker >= t) |>
+        filter(detect)
+      fit <- lm(biomarker ~ disease, data = d)
+      tidy(fit, conf.int = TRUE) |>
+        filter(term == "disease") |>
+        transmute(estimate, conf.low, conf.high, n_used = nrow(d))
+    })
+  ) |>
+  unnest(est)
+
+
+
+p_n <- sens |>
+  ggplot(aes(x = thresh, y = n_used)) +
+  geom_line() +
+  labs(
+    title = "Transform: How Thresholding Changes Effective Sample Size",
+    x = "Detection threshold",
+    y = "Number of samples retained"
+  ) +
+  theme_bw()
+
+print(p_n)
+
+
+```
+:::
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+## <span style="font-size:60%">Data Lifecycle and Robustness - Transformation </span> {.smaller}
+
+
+::: columns
+::: {.column .small}
+
+
+- as researcher determined threshold increases $\rightarrow$ samples are progressively removed as a result of the analyst’s preprocessing choice
+
+Plot interpretation
+
+- outcome [biological effect] : depends on biomarker values near the detection limit
+- when large fraction of the cohort is removed effect might be unstable and power to identify associate features with outcome lessens
+
+
+
+
+:::
+::: column
+
+```{r}
+#| fig-width: 8
+#| fig-height: 9
+
+library(tidyverse)
+library(broom)
+library(purrr)
+
+set.seed(2)
+n <- 400
+
+dat <- tibble(
+  disease = rbinom(n, 1, 0.5),
+  site = sample(c("Site_A","Site_B"), n, replace = TRUE),
+  biomarker = rnorm(n, mean = 0.9*disease, sd = 1.1)
+) |>
+  # imagine assay has a detection limit; values below are effectively "undetected"
+  mutate(lod = -0.2)
+
+threshold_grid <- tibble(thresh = seq(-1, 1, by = 0.1))
+
+sens <- threshold_grid |>
+  mutate(
+    # analyst choice: filter to "detectable" biomarker values
+    est = map(thresh, \(t) {
+      d <- dat |>
+        mutate(detect = biomarker >= t) |>
+        filter(detect)
+      fit <- lm(biomarker ~ disease, data = d)
+      tidy(fit, conf.int = TRUE) |>
+        filter(term == "disease") |>
+        transmute(estimate, conf.low, conf.high, n_used = nrow(d))
+    })
+  ) |>
+  unnest(est)
+
+
+
+p_n <- sens |>
+  ggplot(aes(x = thresh, y = n_used)) +
+  geom_line() +
+  labs(
+    title = "Transform: How Thresholding Changes Effective Sample Size",
+    x = "Detection threshold",
+    y = "Number of samples retained"
+  ) +
+  theme_bw()
+
+print(p_n)
+
+
+```
+:::
+:::
+
+
+<style>
+.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
+.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
+</style>
+
+
+
+
+
+## <span style="font-size:80%">Key Contributors to Uncertainty</span> {.smaller}
+
+- biological systems are heterogeneous and dynamic
+- measurements are indirect and error-prone
+- data are collected through real-world clinical and operational workflows
+- models necessarily compress reality into tractable forms
+- uncertainty can arise: before, during and after the modeling step
+
+::: footer
+
+:::
+
