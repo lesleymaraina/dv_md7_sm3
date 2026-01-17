@@ -586,15 +586,11 @@ print(p_n)
 
 
 
+## <span style="font-size:80%">Summary</span> {.smaller}
 
-
-## <span style="font-size:80%">Key Contributors to Uncertainty</span> {.smaller}
-
-- biological systems are heterogeneous and dynamic
-- measurements are indirect and error-prone
-- data are collected through real-world clinical and operational workflows
-- models necessarily compress reality into tractable forms
-- uncertainty can arise: before, during and after the modeling step
+- robustness : capacity of an analytic pipeline or conclusion to remain consistent when exposed to variation
+- sources of variation include missing or imbalanced data, uncertainty in labels, alternative feature extraction strategies
+- robustness can be evaluated using fundamental data visualization strategies across the full data science lifecycle
 
 ::: footer
 
