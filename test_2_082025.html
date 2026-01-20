@@ -28,72 +28,6 @@
       margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
       vertical-align: middle;
     }
-    /* CSS for syntax highlighting */
-    html { -webkit-text-size-adjust: 100%; }
-    pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-    pre > code.sourceCode > span:empty { height: 1.2em; }
-    .sourceCode { overflow: visible; }
-    code.sourceCode > span { color: inherit; text-decoration: inherit; }
-    div.sourceCode { margin: 1em 0; }
-    pre.sourceCode { margin: 0; }
-    @media screen {
-    div.sourceCode { overflow: auto; }
-    }
-    @media print {
-    pre > code.sourceCode { white-space: pre-wrap; }
-    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-    }
-    pre.numberSource code
-      { counter-reset: source-line 0; }
-    pre.numberSource code > span
-      { position: relative; left: -4em; counter-increment: source-line; }
-    pre.numberSource code > span > a:first-child::before
-      { content: counter(source-line);
-        position: relative; left: -1em; text-align: right; vertical-align: baseline;
-        border: none; display: inline-block;
-        -webkit-touch-callout: none; -webkit-user-select: none;
-        -khtml-user-select: none; -moz-user-select: none;
-        -ms-user-select: none; user-select: none;
-        padding: 0 4px; width: 4em;
-        color: #aaaaaa;
-      }
-    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-    div.sourceCode
-      { color: #003b4f; background-color: #f1f3f5; }
-    @media screen {
-    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-    }
-    code span { color: #003b4f; } /* Normal */
-    code span.al { color: #ad0000; } /* Alert */
-    code span.an { color: #5e5e5e; } /* Annotation */
-    code span.at { color: #657422; } /* Attribute */
-    code span.bn { color: #ad0000; } /* BaseN */
-    code span.bu { } /* BuiltIn */
-    code span.cf { color: #003b4f; font-weight: bold; } /* ControlFlow */
-    code span.ch { color: #20794d; } /* Char */
-    code span.cn { color: #8f5902; } /* Constant */
-    code span.co { color: #5e5e5e; } /* Comment */
-    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
-    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
-    code span.dt { color: #ad0000; } /* DataType */
-    code span.dv { color: #ad0000; } /* DecVal */
-    code span.er { color: #ad0000; } /* Error */
-    code span.ex { } /* Extension */
-    code span.fl { color: #ad0000; } /* Float */
-    code span.fu { color: #4758ab; } /* Function */
-    code span.im { color: #00769e; } /* Import */
-    code span.in { color: #5e5e5e; } /* Information */
-    code span.kw { color: #003b4f; font-weight: bold; } /* Keyword */
-    code span.op { color: #5e5e5e; } /* Operator */
-    code span.ot { color: #003b4f; } /* Other */
-    code span.pp { color: #ad0000; } /* Preprocessor */
-    code span.sc { color: #5e5e5e; } /* SpecialChar */
-    code span.ss { color: #20794d; } /* SpecialString */
-    code span.st { color: #20794d; } /* String */
-    code span.va { color: #111111; } /* Variable */
-    code span.vs { color: #20794d; } /* VerbatimString */
-    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   </style>
   <link rel="stylesheet" href="test_2_082025_files/libs/revealjs/dist/theme/quarto-f563837468303362081e247dddd440d0.css">
   <link rel="stylesheet" href="style.css">
@@ -237,30 +171,67 @@
 <div class="footer">
 
 </div>
+</section>
+<section id="robustness-data-lifecycle---import" class="slide level2 smaller">
+<h2><span style="font-size:80%">Robustness: Data Lifecycle - Import</span></h2>
+<ul>
+<li>Robustness: capacity of a model, analytic pipeline, or scientific conclusion to consistent behavior when exposed to variations and/or perturbations</li>
+<li>Maintaining robustness at the import stage might involve:
+<ul>
+<li>conclusions remain stable across representational differences</li>
+<li>analytic pipeline absorbs operational variability</li>
+<li>visualizations confirm consistency before modeling begins</li>
+</ul></li>
+<li>plots developed at the import stage supports robustness by revealing unit differences across sites which can help guide downstream harmonization</li>
+</ul>
+<p><span style="font-size:50%">Balendran, A., et. al.&nbsp;npj Digit. Med. 8, 38 (2025).</span></p>
+<div class="footer">
+
+</div>
+</section>
+<section id="example-unit-consistency-supports-robust-inference" class="slide level2 smaller">
+<h2><span style="font-size:80%">Example: Unit consistency supports robust inference</span></h2>
+<p><code>Scientific question</code>: Are lactate levels higher in sepsis cases than in controls?</p>
+<p><strong>Data artifacts at import stage</strong>:</p>
+<ul>
+<li><p>Hospital A reports lactate in mmol/L</p></li>
+<li><p>Hospital B reports lactate in mg/dL</p></li>
+<li><p>Biology is consistent across sites</p></li>
+<li><p>Units differ due to workflow choices</p></li>
+<li><p>Plots generated at the import stage can help clarify sources of variation</p></li>
+</ul>
+<div class="footer">
+
+</div>
 <style>
 .tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
 .tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
 </style>
 </section>
-<section id="data-lifecycle---import-displaying-missigness-by-site" class="slide level2 smaller">
-<h2><span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span></h2>
+<section id="example-unit-consistency-supports-robust-inference-1" class="slide level2 smaller">
+<h2><span style="font-size:60%">Example: Unit consistency supports robust inference</span></h2>
 <div class="columns">
 <div class="column small">
-<p>Research Question:</p>
-<p>Are inflammatory biomarkers higher in sepsis cases than in controls, and is that conclusion robust to site-to-site differences in missingness?</p>
-<p>Background:</p>
+<p><strong>Plot Interpretation</strong></p>
 <ul>
-<li>different hospitals/sites often have different lab workflows</li>
-<li>one site has more missing lactate values (missingness that is operational, not biological)</li>
-<li>the same clinical label can arrive encoded as “Sepsis”, “sepsis”, “Yes”, “1”, etc <span class="math inline">\(\rightarrow\)</span> use tidy strategies to make encodings uniform</li>
+<li><p>Simulated biological data that introduces unit inconsistency at import to mimic data variability</p></li>
+<li><p><strong>left plot</strong>: imported lactate values by site, revealing Hospital B’s values are about 9 times higher due to unit differences (mg/dL vs mmol/L)</p></li>
+<li><p><strong>middle and right plots</strong>:</p>
+<ul>
+<li>lactate by sepsis status within each hospital</li>
+<li>scales differ <span class="math inline">\(\rightarrow\)</span> making direct comparison misleading before unit harmonization</li>
+</ul></li>
+<li><p>plots highlight unit inconsistencies</p></li>
+<li><p>strategy: data harmonization before analysis</p></li>
+<li><p>data visualization can be used as a tool to evaluate robustness at the import stage</p></li>
+<li><p>harmonization strategy : convert lactate units from mg/dL <span class="math inline">\(\rightarrow\)</span> mmol/L by dividing Hospital B’s lactate values by 9</p></li>
 </ul>
-<p>Conclusions - Hospital B has more missing values than Hospital A</p>
 </div><div class="column">
 <div class="cell">
 <div class="cell-output-display">
 <div>
 <figure>
-<p><img data-src="test_2_082025_files/figure-revealjs/unnamed-chunk-1-1.png" width="768"></p>
+<p><img data-src="test_2_082025_files/figure-revealjs/unnamed-chunk-1-1.png" width="960"></p>
 </figure>
 </div>
 </div>
@@ -270,24 +241,78 @@
 .tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
 .tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
 </style>
+</section>
+<section id="data-transformation-and-robustness" class="slide level2 smaller">
+<h2><span style="font-size:80%">Data Transformation and Robustness</span></h2>
+<ul>
+<li>scientific conclusions remain consistent across different choices for normalization, filtering, and thresholding</li>
+<li>analytic pipelines produce stable effect estimates even when raw measurements are skewed or contain extreme values</li>
+<li>plots can be used as guides for transformation decisions</li>
+</ul>
+<p>Steps in transformation:</p>
+<ul>
+<li><strong>normalization</strong>: log transforms, scaling</li>
+<li><strong>filtering</strong>: exclude low-quality or undetectable values</li>
+<li><strong>thresholding</strong>: apply limits of detection or clinical cutoffs</li>
+</ul>
+<div class="footer">
+
+</div>
+</section>
+<section id="biomarker-data-transformation-and-robust-inference" class="slide level2 smaller">
+<h2><span style="font-size:80%">Biomarker data transformation and robust inference</span></h2>
+<p><strong>Scientific question</strong></p>
+<p>Are biomarker levels higher in disease cases than controls, and does this conclusion remain robust under different transformation choices?</p>
+<p><strong>Simulated Data</strong></p>
+<ul>
+<li><strong>sample size</strong>: 400 observations</li>
+<li><strong>groups</strong>: Two groups labeled “Control” and “Disease”, each with roughly equal numbers (randomly assigned)</li>
+<li>raw biomarker values</li>
+</ul>
+<div class="footer">
+
+</div>
+</section>
+<section id="biomarker-data-transformation-and-robust-inference-1" class="slide level2 smaller">
+<h2><span style="font-size:80%">Biomarker data transformation and robust inference</span></h2>
+<p><strong>Transformations Applied</strong>:</p>
+<ol type="1">
+<li><p><code>normalization (log transform)</code>:</p>
+<ul>
+<li>applied log() to raw biomarker values to reduce skewness and make data more symmetric</li>
+<li>helpful for improving downstream model interpretability</li>
+</ul></li>
+<li><p><code>scaling (z-score)</code>:</p>
+<ul>
+<li>standardizes the log-transformed data to have mean zero and standard deviation one</li>
+<li>useful for comparing effect sizes and stabilizing numerical computations</li>
+</ul></li>
+<li><p><code>filtering &amp; thresholding</code>:</p>
+<ul>
+<li>user definited limit of dectection [LOD]: 0.3</li>
+<li>useful for comparing effect sizes and stabilizing numerical computations<br>
+</li>
+<li>values below 0.3 are considered undetectable or unreliable and are set to NA (missing)</li>
+</ul></li>
+</ol>
+<div class="footer">
+
+</div>
 <style>
 .tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
 .tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
 </style>
 </section>
-<section id="data-lifecycle---import-displaying-missigness-by-site-1" class="slide level2 smaller">
-<h2><span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span></h2>
+<section id="biomarker-data-transformation-and-robust-inference-2" class="slide level2 smaller">
+<h2><span style="font-size:60%">Biomarker data transformation and robust inference</span></h2>
 <div class="columns">
-<div class="column small">
-<p>Initial robustness claim:</p>
+<div class="column large">
+<p>Boxplots compare biomarker distributions by disease status:</p>
 <ul>
-<li>estimated sepsis–lactate association as determined by a linear model, should not depend on encoding differences [missingness]</li>
-</ul>
-<p>Data Considerations:</p>
-<ul>
-<li>one hospital has systematically more missing lactate labs</li>
-<li>sepsis status encoded inconsistently</li>
-<li>data appears missing because of differences in encodings</li>
+<li><strong>raw biomarker values</strong>: shows original skewed data with outliers.</li>
+<li><strong>log-transformed biomarker</strong>: shows more symmetric, normalized data.</li>
+<li><strong>filtered raw data</strong>: excludes low/undetectable values to focus on reliable measurements.</li>
+<li><strong>log-transformed filtered data</strong>: combines normalization and quality filtering.</li>
 </ul>
 </div><div class="column">
 <div class="cell">
@@ -304,126 +329,6 @@
 .tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
 .tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
 </style>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-</section>
-<section id="data-lifecycle---import-displaying-missigness-by-site-2" class="slide level2 smaller">
-<h2><span style="font-size:60%">Data Lifecycle - Import: Displaying Missigness by Site</span></h2>
-<div class="columns">
-<div class="column small">
-<p>Standardize variable:</p>
-<ul>
-<li>in the <code>sepsis_raw</code> data column the following is noted:</li>
-<li>Sepsis-positive: “Sepsis”, “sepsis”, “YES”, “1”</li>
-<li>Sepsis-negative: “Control”</li>
-<li>standardize values : sepsis is encoded as 1 or 0: 1- sepsis present; 0 - control</li>
-</ul>
-<div class="sourceCode" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href=""></a>tidy_data <span class="ot">&lt;-</span> raw <span class="sc">|&gt;</span></span>
-<span id="cb1-2"><a href=""></a>  <span class="fu">mutate</span>(<span class="at">sepsis =</span> <span class="fu">if_else</span>(</span>
-<span id="cb1-3"><a href=""></a>    <span class="fu">str_to_lower</span>(sepsis_raw) <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"sepsis"</span>,<span class="st">"yes"</span>,<span class="st">"1"</span>), <span class="dv">1</span>, <span class="dv">0</span></span>
-<span id="cb1-4"><a href=""></a>  ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<ul>
-<li>post encoding repair : estimated sepsis effect (with uncertainty) reflects true assoication of sepsis with outcome</li>
-</ul>
-</div><div class="column">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="test_2_082025_files/figure-revealjs/unnamed-chunk-3-1.png" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-</section>
-<section id="data-lifecycle-and-robustness---transformation" class="slide level2 smaller">
-<h2><span style="font-size:60%">Data Lifecycle and Robustness - Transformation </span></h2>
-<div class="columns">
-<div class="column small">
-<ul>
-<li>Data transformation stage: convert raw measurements into analytically usable quantities</li>
-<li>Steps involve:
-<ul>
-<li>normalization (log transforms, scaling)</li>
-<li>filtering (excluding low-quality or undetectable values)</li>
-<li>thresholding (limits of detection, clinical cutoffs)</li>
-</ul></li>
-</ul>
-<p>Research Question:</p>
-<p>Does disease status affect biomarker levels, and is that conclusion stable when we change what we consider “detectable” biomarker values?</p>
-<p>Simulated dataset:</p>
-<ul>
-<li>dataset represents a multi-site clinical study [n=400] measuring a continuous circulating biomarker—such as a plasma protein or metabolite—hypothesized to be modestly elevated in individuals with disease</li>
-</ul>
-</div><div class="column">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="test_2_082025_files/figure-revealjs/unnamed-chunk-4-1.png" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-</section>
-<section id="data-lifecycle-and-robustness---transformation-1" class="slide level2 smaller">
-<h2><span style="font-size:60%">Data Lifecycle and Robustness - Transformation </span></h2>
-<div class="columns">
-<div class="column small">
-<ul>
-<li>as researcher determined threshold increases <span class="math inline">\(\rightarrow\)</span> samples are progressively removed as a result of the analyst’s preprocessing choice</li>
-</ul>
-<p>Plot interpretation</p>
-<ul>
-<li>outcome [biological effect] : depends on biomarker values near the detection limit</li>
-<li>when large fraction of the cohort is removed effect might be unstable and power to identify associate features with outcome lessens</li>
-</ul>
-</div><div class="column">
-<div class="cell">
-<div class="cell-output-display">
-<div>
-<figure>
-<p><img data-src="test_2_082025_files/figure-revealjs/unnamed-chunk-5-1.png" width="768"></p>
-</figure>
-</div>
-</div>
-</div>
-</div></div>
-<style>
-.tiny-table table { font-size: 0.8em; }        /* adjust as needed (0.8–0.9em) */
-.tiny-table figcaption, .tiny-table .table-caption { font-size: 0.75em; }
-</style>
-</section>
-<section id="summary" class="slide level2 smaller">
-<h2><span style="font-size:80%">Summary</span></h2>
-<ul>
-<li>robustness : capacity of an analytic pipeline or conclusion to remain consistent when exposed to variation</li>
-<li>sources of variation include missing or imbalanced data, uncertainty in labels, alternative feature extraction strategies</li>
-<li>robustness can be evaluated using fundamental data visualization strategies across the full data science lifecycle</li>
-</ul>
-<div class="footer">
-
-</div>
 
 </section>
     </div>
